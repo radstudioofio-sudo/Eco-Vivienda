@@ -3,101 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eco-Dashboard Dinámico</title>
+    <title>Eco-Vivienda Smart Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Animación para el pulso de "En Vivo" */
+        @keyframes pulse-green {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+        }
+        .animate-pulse-green {
+            animation: pulse-green 2s infinite;
+        }
+        /* Transición suave para los números que cambian */
+        .value-transition {
+            transition: all 0.5s ease-in-out;
+        }
+    </style>
 </head>
-<body class="bg-slate-900 p-4 min-h-screen flex items-center justify-center text-white">
-    <div class="w-full max-w-md bg-slate-800 rounded-2xl shadow-xl p-6 border border-slate-700">
-        <div class="mb-4 text-center">
-            <label class="text-xs text-slate-400 uppercase block mb-1">Simular dispositivo:</label>
-            <select id="device-selector" class="bg-slate-700 text-white text-sm rounded-lg p-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-400" onchange="changeDevice(this.value)">
-                <option value="lavadora">Hernan - Lavadora</option>
-                <option value="refri">Jeury/Jahel - Refrigerador</option>
-                <option value="aire">Sabier/Jeremy - Aire Acondicionado</option>
-                <option value="microondas">Julietin - Microondas</option>
-                <option value="television">Alecin - Televisión</option>
-                <option value="estufa">Armando - Estufa</option>
-                <option value="abanico">David - Abanico (Ventilador)</option>
+<body class="bg-slate-950 p-4 min-h-screen flex items-center justify-center text-white font-sans">
+
+    <div class="w-full max-w-lg bg-slate-900 rounded-3xl shadow-2xl p-6 border border-slate-800 backdrop-blur-md transform transition-all duration-300 hover:scale-[1.01]">
+        
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse-green"></span>
+                <span class="text-xs font-mono text-emerald-400 tracking-widest uppercase">Telemetría en Vivo</span>
+            </div>
+            
+            <select id="device-selector" class="w-full sm:w-auto bg-slate-800 text-slate-200 text-sm font-semibold rounded-xl px-4 py-2.5 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer transition-all hover:bg-slate-750" onchange="changeDevice(this.value)">
+                <option value="lavadora">🧺 Lavadora</option>
+                <option value="refri">❄️ Refrigerador</option>
+                <option value="aire">💨 Aire Acondicionado</option>
+                <option value="microondas">🍿 Microondas</option>
+                <option value="television">📺 Televisión</option>
+                <option value="estufa">🍳 Estufa Eléctrica</option>
+                <option value="abanico">🌀 Abanico</option>
             </select>
         </div>
 
-        <hr class="border-slate-700 mb-4">
+        <hr class="border-slate-800 mb-6">
 
-        <h1 id="device-name" class="text-3xl font-bold text-green-400 mb-1 text-center">Electrodoméstico</h1>
-        <p class="text-center text-xs text-slate-400 mb-6 font-mono" id="timestamp"></p>
+        <div class="text-center mb-8">
+            <h1 id="device-name" class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200 tracking-tight mb-2">Electrodoméstico</h1>
+            <p class="text-xs text-slate-500 font-mono" id="timestamp">Sincronizando...</p>
+        </div>
         
         <div class="grid grid-cols-2 gap-4">
-            <div class="bg-slate-700/50 p-4 rounded-xl border border-slate-600">
-                <p class="text-[10px] text-slate-400 uppercase tracking-wider">Consumo Actual</p>
-                <p class="text-2xl font-bold text-blue-400 mt-1" id="kw-val">0.0 kW</p>
+            
+            <div class="bg-slate-800/40 p-5 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300 group">
+                <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider group-hover:text-emerald-400 transition-colors">Demanda Actual</p>
+                <p class="text-3xl font-black text-emerald-400 mt-2 font-mono value-transition" id="kw-val">0.00 kW</p>
             </div>
-            <div class="bg-slate-700/50 p-4 rounded-xl border border-slate-600">
-                <p class="text-[10px] text-slate-400 uppercase tracking-wider">Uso Diario</p>
-                <p class="text-2xl font-bold text-amber-400 mt-1" id="hours-val">0h</p>
+            
+            <div class="bg-slate-800/40 p-5 rounded-2xl border border-slate-800 hover:border-cyan-500/30 transition-all duration-300 group">
+                <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider group-hover:text-cyan-400 transition-colors">Tiempo de Uso</p>
+                <p class="text-3xl font-black text-cyan-400 mt-2 font-mono value-transition" id="hours-val">0.0 h</p>
             </div>
-            <div class="bg-slate-700/50 p-4 rounded-xl border border-slate-600 col-span-2 text-center">
-                <p class="text-[10px] text-slate-400 uppercase tracking-wider">Costo Estimado (Por Día)</p>
-                <p class="text-3xl font-extrabold text-rose-400 mt-1" id="cost-val">$0.00</p>
+            
+            <div class="bg-gradient-to-br from-slate-800/80 to-slate-900/40 p-6 rounded-2xl border border-slate-800 col-span-2 text-center hover:border-rose-500/20 transition-all duration-300 group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-rose-500/40 to-transparent"></div>
+                <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider group-hover:text-rose-400 transition-colors">Impacto Económico Diario</p>
+                <p class="text-4xl font-black text-rose-400 mt-2 font-mono value-transition" id="cost-val">$0.00</p>
             </div>
         </div>
 
-        <div class="mt-6 bg-slate-700/30 p-4 rounded-xl border-l-4 border-green-400">
-            <h2 class="font-bold text-green-400 text-sm">Respuesta para reducir el consumo:</h2>
-            <p id="eco-tip" class="text-xs mt-2 text-slate-300 leading-relaxed"></p>
+        <div class="mt-6 bg-emerald-950/20 p-5 rounded-2xl border border-emerald-500/10 relative group">
+            <div class="absolute -top-2.5 left-6 bg-slate-900 px-3 text-xs font-bold text-emerald-400 uppercase tracking-widest border border-emerald-500/20 rounded-full">
+                Estrategia de Mitigación
+            </div>
+            <p id="eco-tip" class="text-sm mt-1 text-slate-300 leading-relaxed font-medium transition-all duration-500"></p>
         </div>
     </div>
 
     <script>
-        // Base de datos con rangos de consumo reales (Min kW - Max kW) e indicaciones escritas
+        // Base de datos optimizada sin nombres personales
         const inventory = {
-            "lavadora": { name: "Lavadora (Hernan)", minKw: 0.4, maxKw: 0.9, minHours: 1, maxHours: 3, tip: "Lava cargas completas con agua fría. El 90% de la energía de una lavadora se usa solo para calentar el agua." },
-            "refri": { name: "Refrigerador (Jeury / Jahel)", minKw: 0.15, maxKw: 0.30, minHours: 24, maxHours: 24, tip: "Evita abrir la puerta constantemente. Mantén los sellos limpios para que el frío no se escape y el motor trabaje de más." },
-            "aire": { name: "Aire Acondicionado (Sabier / Jeremy)", minKw: 1.0, maxKw: 2.2, minHours: 4, maxHours: 10, tip: "Configura la temperatura a 24°C. Cada grado menos aumenta el consumo un 8%. Mantén ventanas cerradas." },
-            "microondas": { name: "Microondas (Julietin)", minKw: 0.8, maxKw: 1.5, minHours: 0.2, maxHours: 0.8, tip: "Descongela los alimentos en el refrigerador desde la noche anterior en lugar de usar la potencia del microondas." },
-            "television": { name: "Televisión (Alecin)", minKw: 0.05, maxKw: 0.15, minHours: 2, maxHours: 6, tip: "Desconéctala por completo si usas barras de sonido o consolas; el modo 'Standby' (apagado con foquito rojo) sigue consumiendo." },
-            "estufa": { name: "Estufa Eléctrica (Armando)", minKw: 1.5, maxKw: 3.0, minHours: 0.5, maxHours: 2, tip: "Usa ollas con fondo plano que cubran bien la hornilla y ponles tapa para cocinar más rápido reteniendo el calor." },
-            "abanico": { name: "Abanico (David)", minKw: 0.04, maxKw: 0.09, minHours: 5, maxHours: 12, tip: "Limpia las aspas y el motor regularmente. El polvo acumulado frena el giro y hace que consuma más energía mecánicamente." }
+            "lavadora": { name: "Lavadora", minKw: 0.4, maxKw: 0.9, minHours: 1, maxHours: 3, tip: "Lava cargas completas utilizando ciclos de agua fría. El 90% de la energía se desperdicia exclusivamente en calentar el agua mediante resistencias térmicas." },
+            "refri": { name: "Refrigerador", minKw: 0.12, maxKw: 0.25, minHours: 24, maxHours: 24, tip: "Evita la apertura prolongada de la puerta. Configura el termostato en niveles medios y limpia los serpentines traseros para asegurar una correcta transferencia de calor." },
+            "aire": { name: "Aire Acondicionado", minKw: 1.2, maxKw: 2.5, minHours: 4, maxHours: 10, tip: "Fija la temperatura de confort en 24°C. Cada grado inferior incrementa el esfuerzo del compresor y eleva el consumo eléctrico en un rango del 7% al 10%." },
+            "microondas": { name: "Microondas", minKw: 0.9, maxKw: 1.6, minHours: 0.1, maxHours: 0.6, tip: "Planifica el descongelado de alimentos pasándolos al refrigerador con anticipación, evitando el uso innecesario de potencia inductiva de microondas." },
+            "television": { name: "Televisión", minKw: 0.06, maxKw: 0.18, minHours: 2, maxHours: 7, tip: "Utiliza temporizadores de apagado automático y deshabilita el inicio rápido (Standby), ya que el consumo vampiro sigue cobrando energía en reposo." },
+            "estufa": { name: "Estufa Eléctrica", minKw: 1.8, maxKw: 3.5, minHours: 0.4, maxHours: 1.8, tip: "Aprovecha el calor residual apagando las hornillas un par de minutos antes de terminar. Cocina siempre utilizando tapas para evitar pérdidas por convección." },
+            "abanico": { name: "Abanico", minKw: 0.04, maxKw: 0.08, minHours: 6, maxHours: 14, tip: "Realiza mantenimiento mecánico limpiando las aspas y lubricando el eje del motor. La acumulación de fricción incrementa la resistencia y el gasto eléctrico." }
         };
 
-        // Precio promedio del kWh (puedes ajustarlo si deseas)
-        const PRICE_PER_KWH = 0.15; 
+        const PRICE_PER_KWH = 0.18; // Costo por kWh configurable
 
         function updateDashboard(itemId) {
             const data = inventory[itemId];
             if (!data) return;
 
-            // 1. Nombre y sugerencia
-            document.getElementById('device-name').innerText = data.name;
-            document.getElementById('eco-tip').innerText = data.tip;
-            document.getElementById('timestamp').innerText = "Lectura: " + new Date().toLocaleTimeString();
-            
-            // 2. Generar consumos aleatorios dentro del rango real de cada aparato
-            const randomKw = (Math.random() * (data.maxKw - data.minKw) + data.minKw).toFixed(2);
-            // Si el aparato es el refri, siempre son 24 horas fijas
-            const randomHours = data.minHours === data.maxHours ? data.minHours : (Math.random() * (data.maxHours - data.minHours) + data.minHours).toFixed(1);
+            // Transición visual: Ocultar suavemente el contenido mientras cambia
+            const elements = ['kw-val', 'hours-val', 'cost-val', 'eco-tip'];
+            elements.forEach(id => document.getElementById(id).style.opacity = 0.3);
 
-            // 3. Calcular costo financiero (kW * Horas * Precio)
-            const dailyCost = (randomKw * randomHours * PRICE_PER_KWH).toFixed(2);
+            setTimeout(() => {
+                document.getElementById('device-name').innerText = data.name;
+                document.getElementById('eco-tip').innerText = data.tip;
+                document.getElementById('timestamp').innerText = "Última lectura: " + new Date().toLocaleTimeString();
+                
+                // Generar fluctuación dinámica
+                const randomKw = (Math.random() * (data.maxKw - data.minKw) + data.minKw).toFixed(2);
+                const randomHours = data.minHours === data.maxHours ? data.minHours : (Math.random() * (data.maxHours - data.minHours) + data.minHours).toFixed(1);
+                const dailyCost = (randomKw * randomHours * PRICE_PER_KWH).toFixed(2);
 
-            // 4. Imprimir en pantalla
-            document.getElementById('kw-val').innerText = randomKw + " kW";
-            document.getElementById('hours-val').innerText = randomHours + " h";
-            document.getElementById('cost-val').innerText = "$" + dailyCost + " USD";
+                // Modificar valores en pantalla
+                document.getElementById('kw-val').innerText = randomKw + " kW";
+                document.getElementById('hours-val').innerText = randomHours + " h";
+                document.getElementById('cost-val').innerText = "$" + dailyCost + " USD";
+
+                // Regresar opacidad original con animación
+                elements.forEach(id => document.getElementById(id).style.opacity = 1);
+            }, 200);
         }
 
-        // Función para el menú desplegable local
         function changeDevice(val) {
             window.history.replaceState({}, '', '?item=' + val);
             updateDashboard(val);
         }
 
-        // Leer parámetro al cargar (?item=...)
+        // Lectura de parámetros de URL para compatibilidad con Códigos QR
         const params = new URLSearchParams(window.location.search);
         const currentItem = params.get('item') || 'lavadora';
         
-        // Sincronizar el selector visual con la URL
         document.getElementById('device-selector').value = currentItem;
         updateDashboard(currentItem);
+
+        // Bucle de actualización automática: cambia los números sutilmente cada 4 segundos simulando tiempo real
+        setInterval(() => {
+            const activeSelector = document.getElementById('device-selector').value;
+            updateDashboard(activeSelector);
+        }, 4000);
     </script>
 </body>
 </html>
