@@ -3,35 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eco-Ciudad Dashboard</title>
+    <title>Eco-Dashboard Dinámico</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-5">
-    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-6">
-        <h1 class="text-2xl font-bold text-green-600 mb-4 text-center">Dashboard: Lavadora</h1>
+<body class="bg-slate-900 p-4 min-h-screen flex items-center justify-center text-white">
+    <div class="w-full max-w-md bg-slate-800 rounded-2xl shadow-xl p-6 border border-slate-700">
+        <div class="mb-4 text-center">
+            <label class="text-xs text-slate-400 uppercase block mb-1">Simular dispositivo:</label>
+            <select id="device-selector" class="bg-slate-700 text-white text-sm rounded-lg p-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-400" onchange="changeDevice(this.value)">
+                <option value="lavadora">Hernan - Lavadora</option>
+                <option value="refri">Jeury/Jahel - Refrigerador</option>
+                <option value="aire">Sabier/Jeremy - Aire Acondicionado</option>
+                <option value="microondas">Julietin - Microondas</option>
+                <option value="television">Alecin - Televisión</option>
+                <option value="estufa">Armando - Estufa</option>
+                <option value="abanico">David - Abanico (Ventilador)</option>
+            </select>
+        </div>
+
+        <hr class="border-slate-700 mb-4">
+
+        <h1 id="device-name" class="text-3xl font-bold text-green-400 mb-1 text-center">Electrodoméstico</h1>
+        <p class="text-center text-xs text-slate-400 mb-6 font-mono" id="timestamp"></p>
         
         <div class="grid grid-cols-2 gap-4">
-            <div class="bg-blue-50 p-4 rounded-lg">
-                <p class="text-sm text-gray-500">Horas de uso</p>
-                <p class="text-xl font-bold">2 horas/día</p>
+            <div class="bg-slate-700/50 p-4 rounded-xl border border-slate-600">
+                <p class="text-[10px] text-slate-400 uppercase tracking-wider">Consumo Actual</p>
+                <p class="text-2xl font-bold text-blue-400 mt-1" id="kw-val">0.0 kW</p>
             </div>
-            <div class="bg-yellow-50 p-4 rounded-lg">
-                <p class="text-sm text-gray-500">Consumo</p>
-                <p class="text-xl font-bold">0.8 kWh</p>
+            <div class="bg-slate-700/50 p-4 rounded-xl border border-slate-600">
+                <p class="text-[10px] text-slate-400 uppercase tracking-wider">Uso Diario</p>
+                <p class="text-2xl font-bold text-amber-400 mt-1" id="hours-val">0h</p>
             </div>
-            <div class="bg-red-50 p-4 rounded-lg col-span-2">
-                <p class="text-sm text-gray-500">Costo estimado</p>
-                <p class="text-xl font-bold text-red-600">$0.16 USD</p>
+            <div class="bg-slate-700/50 p-4 rounded-xl border border-slate-600 col-span-2 text-center">
+                <p class="text-[10px] text-slate-400 uppercase tracking-wider">Costo Estimado (Por Día)</p>
+                <p class="text-3xl font-extrabold text-rose-400 mt-1" id="cost-val">$0.00</p>
             </div>
         </div>
 
-        <div class="mt-6 border-t pt-4">
-            <h2 class="font-semibold text-gray-700">Cómo reducir el consumo:</h2>
-            <p class="text-gray-600 mt-2">
-                - Lava siempre con carga completa.
-                - Utiliza ciclos de agua fría para evitar el gasto energético del calentador.
-            </p>
+        <div class="mt-6 bg-slate-700/30 p-4 rounded-xl border-l-4 border-green-400">
+            <h2 class="font-bold text-green-400 text-sm">Respuesta para reducir el consumo:</h2>
+            <p id="eco-tip" class="text-xs mt-2 text-slate-300 leading-relaxed"></p>
         </div>
     </div>
+
+    <script>
+        // Base de datos con rangos de consumo reales (Min kW - Max kW) e indicaciones escritas
+        const inventory = {
+            "lavadora": { name: "Lavadora (Hernan)", minKw: 0.4, maxKw: 0.9, minHours: 1, maxHours: 3, tip: "Lava cargas completas con agua fría. El 90% de la energía de una lavadora se usa solo para calentar el agua." },
+            "refri": { name: "Refrigerador (Jeury / Jahel)", minKw: 0.15, maxKw: 0.30, minHours: 24, maxHours: 24, tip: "Evita abrir la puerta constantemente. Mantén los sellos limpios para que el frío no se escape y el motor trabaje de más." },
+            "aire": { name: "Aire Acondicionado (Sabier / Jeremy)", minKw: 1.0, maxKw: 2.2, minHours: 4, maxHours: 10, tip: "Configura la temperatura a 24°C. Cada grado menos aumenta el consumo un 8%. Mantén ventanas cerradas." },
+            "microondas": { name: "Microondas (Julietin)", minKw: 0.8, maxKw: 1.5, minHours: 0.2, maxHours: 0.8, tip: "Descongela los alimentos en el refrigerador desde la noche anterior en lugar de usar la potencia del microondas." },
+            "television": { name: "Televisión (Alecin)", minKw: 0.05, maxKw: 0.15, minHours: 2, maxHours: 6, tip: "Desconéctala por completo si usas barras de sonido o consolas; el modo 'Standby' (apagado con foquito rojo) sigue consumiendo." },
+            "estufa": { name: "Estufa Eléctrica (Armando)", minKw: 1.5, maxKw: 3.0, minHours: 0.5, maxHours: 2, tip: "Usa ollas con fondo plano que cubran bien la hornilla y ponles tapa para cocinar más rápido reteniendo el calor." },
+            "abanico": { name: "Abanico (David)", minKw: 0.04, maxKw: 0.09, minHours: 5, maxHours: 12, tip: "Limpia las aspas y el motor regularmente. El polvo acumulado frena el giro y hace que consuma más energía mecánicamente." }
+        };
+
+        // Precio promedio del kWh (puedes ajustarlo si deseas)
+        const PRICE_PER_KWH = 0.15; 
+
+        function updateDashboard(itemId) {
+            const data = inventory[itemId];
+            if (!data) return;
+
+            // 1. Nombre y sugerencia
+            document.getElementById('device-name').innerText = data.name;
+            document.getElementById('eco-tip').innerText = data.tip;
+            document.getElementById('timestamp').innerText = "Lectura: " + new Date().toLocaleTimeString();
+            
+            // 2. Generar consumos aleatorios dentro del rango real de cada aparato
+            const randomKw = (Math.random() * (data.maxKw - data.minKw) + data.minKw).toFixed(2);
+            // Si el aparato es el refri, siempre son 24 horas fijas
+            const randomHours = data.minHours === data.maxHours ? data.minHours : (Math.random() * (data.maxHours - data.minHours) + data.minHours).toFixed(1);
+
+            // 3. Calcular costo financiero (kW * Horas * Precio)
+            const dailyCost = (randomKw * randomHours * PRICE_PER_KWH).toFixed(2);
+
+            // 4. Imprimir en pantalla
+            document.getElementById('kw-val').innerText = randomKw + " kW";
+            document.getElementById('hours-val').innerText = randomHours + " h";
+            document.getElementById('cost-val').innerText = "$" + dailyCost + " USD";
+        }
+
+        // Función para el menú desplegable local
+        function changeDevice(val) {
+            window.history.replaceState({}, '', '?item=' + val);
+            updateDashboard(val);
+        }
+
+        // Leer parámetro al cargar (?item=...)
+        const params = new URLSearchParams(window.location.search);
+        const currentItem = params.get('item') || 'lavadora';
+        
+        // Sincronizar el selector visual con la URL
+        document.getElementById('device-selector').value = currentItem;
+        updateDashboard(currentItem);
+    </script>
 </body>
 </html>
